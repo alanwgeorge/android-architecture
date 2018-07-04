@@ -17,7 +17,7 @@ package com.example.android.architecture.blueprints.todoapp.addedittask
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
-import android.databinding.ObservableBoolean
+import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableField
 import android.support.annotation.StringRes
 import com.example.android.architecture.blueprints.todoapp.R
@@ -40,9 +40,9 @@ class AddEditTaskViewModel(
         private val tasksRepository: TasksRepository
 ) : AndroidViewModel(context), TasksDataSource.GetTaskCallback {
 
-    val title = ObservableField<String>()
-    val description = ObservableField<String>()
-    val dataLoading = ObservableBoolean(false)
+    val title = MutableLiveData<String>()
+    val description = MutableLiveData<String>()
+    val dataLoading = MutableLiveData<Boolean>().apply { value = false }
     internal val snackbarMessage = SingleLiveEvent<Int>()
     internal val taskUpdatedEvent = SingleLiveEvent<Void>()
     private var taskId: String? = null
@@ -52,7 +52,7 @@ class AddEditTaskViewModel(
     private var taskCompleted = false
 
     fun start(taskId: String?) {
-        if (dataLoading.get()) {
+        if (dataLoading.value == true) {
             // Already loading, ignore.
             return
         }
@@ -61,17 +61,17 @@ class AddEditTaskViewModel(
             // No need to populate, it's a new task or it already has data
             return
         }
-        dataLoading.set(true)
+        dataLoading.value = true
         taskId?.let {
             tasksRepository.getTask(it, this)
         }
     }
 
     override fun onTaskLoaded(task: Task) {
-        title.set(task.title)
-        description.set(task.description)
+        title.value = task.title
+        description.value = task.description
         taskCompleted = task.isCompleted
-        dataLoading.set(false)
+        dataLoading.value = false
         isDataLoaded = true
 
         // Note that there's no need to notify that the values changed because we're using
@@ -79,13 +79,13 @@ class AddEditTaskViewModel(
     }
 
     override fun onDataNotAvailable() {
-        dataLoading.set(false)
+        dataLoading.value = false
     }
 
     // Called when clicking on fab.
     fun saveTask() {
-        title.get()?.let { title ->
-            description.get()?.let { description ->
+        title.value?.let { title ->
+            description.value?.let { description ->
                 Task(title, description)
             }
         }?.let { task ->

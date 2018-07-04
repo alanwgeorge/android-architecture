@@ -55,6 +55,7 @@ class AddEditTaskFragment : Fragment() {
         viewDataBinding = AddtaskFragBinding.bind(root).apply {
             viewmodel = (activity as AddEditTaskActivity).obtainViewModel()
         }
+        viewDataBinding.setLifecycleOwner(this)
         setHasOptionsMenu(true)
         retainInstance = false
         return viewDataBinding.root

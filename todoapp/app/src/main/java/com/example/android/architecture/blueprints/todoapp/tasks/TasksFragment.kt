@@ -48,6 +48,7 @@ class TasksFragment : Fragment() {
         viewDataBinding = TasksFragBinding.inflate(inflater, container, false).apply {
             viewmodel = (activity as TasksActivity).obtainViewModel()
         }
+        viewDataBinding.setLifecycleOwner(this)
         setHasOptionsMenu(true)
         return viewDataBinding.root
     }

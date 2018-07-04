@@ -17,13 +17,8 @@ package com.example.android.architecture.blueprints.todoapp.tasks
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
-import android.content.Context
-import android.databinding.BaseObservable
-import android.databinding.Bindable
-import android.databinding.ObservableArrayList
-import android.databinding.ObservableBoolean
-import android.databinding.ObservableField
-import android.databinding.ObservableList
+import android.arch.lifecycle.MutableLiveData
+import android.databinding.*
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.StringRes
@@ -47,12 +42,11 @@ import com.example.android.architecture.blueprints.todoapp.util.EDIT_RESULT_OK
  * getter method.
  */
 class TasksViewModel(
-        context: Application,
+        private val context: Application,
         private val tasksRepository: TasksRepository
 ) : AndroidViewModel(context) {
 
-    private val isDataLoadingError = ObservableBoolean(false)
-    private val context: Context = context.applicationContext //Application Context to avoid leaks.
+    private val isDataLoadingError = MutableLiveData<Boolean>().apply { value = false }
 
     internal val openTaskEvent = SingleLiveEvent<String>()
 
@@ -76,6 +70,7 @@ class TasksViewModel(
 
     fun start() {
         loadTasks(false)
+        updateFiltering()
     }
 
     fun loadTasks(forceUpdate: Boolean) {
@@ -84,10 +79,6 @@ class TasksViewModel(
 
     /**
      * Sets the current task filtering type.
-
-     * @param requestType Can be [TasksFilterType.ALL_TASKS],
-     * *                    [TasksFilterType.COMPLETED_TASKS], or
-     * *                    [TasksFilterType.ACTIVE_TASKS]
      */
     fun updateFiltering() {
         // Depending on the filter type, set the filtering label, icon drawables, etc.
@@ -193,7 +184,7 @@ class TasksViewModel(
                 if (showLoadingUI) {
                     dataLoading.set(false)
                 }
-                isDataLoadingError.set(false)
+                isDataLoadingError.value = false
 
                 with(items) {
                     clear()
@@ -203,7 +194,7 @@ class TasksViewModel(
             }
 
             override fun onDataNotAvailable() {
-                isDataLoadingError.set(true)
+                isDataLoadingError.value = true
             }
         })
     }
